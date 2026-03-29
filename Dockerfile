@@ -1,19 +1,15 @@
-FROM python:3.11-slim
-
-# Install system build dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    libffi-dev \
-    libssl-dev \
-    cargo \
-    rustc \
-    && rm -rf /var/lib/apt/lists/*
+FROM python:3.11 AS builder
 
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+FROM python:3.11-slim
+
+COPY --from=builder /install /usr/local
+
+WORKDIR /app
 COPY main.py .
 
 ENV PORT=8080
