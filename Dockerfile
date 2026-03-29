@@ -1,12 +1,21 @@
 FROM python:3.11-slim
 
+# Install system build dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    libffi-dev \
+    libssl-dev \
+    cargo \
+    rustc \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 COPY main.py .
 
-# Cloud Run injects PORT env var
 ENV PORT=8080
 EXPOSE 8080
 
